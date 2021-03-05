@@ -909,6 +909,7 @@ module.exports = msgHandler = async (client, message) => {
       case "!meme":
       case "!wholesome":
       case "!dank":
+      case "!nsfw":
         let subr = "";
         if (command == "!meme") subr = "memes";
         else if (command == "!wholesome") subr = "wholesomememes";
