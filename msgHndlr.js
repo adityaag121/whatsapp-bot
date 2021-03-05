@@ -933,20 +933,20 @@ module.exports = msgHandler = async (client, message) => {
         client.sendFileFromUrl(chatId, `${url}`, "meme.jpg", `${title}`, id);
         break;
       case "!togglensfw":
-        if (!isGroupMsg) return client.reply(from, mess.error.Gp, id);
-        if (!isGroupAdmins) return client.reply(from, mess.error.admin, id);
+        if (!isGroupMsg) return client.reply(chatId, mess.error.Gp, id);
+        if (!isGroupAdmins) return client.reply(chatId, mess.error.admin, id);
         if (!isNsfw) {
-          nsfw_.push(chat.id);
+          nsfw_.push(chatId);
           fs.writeFileSync("./lib/NSFW.json", JSON.stringify(nsfw_));
           client.reply(
-            from,
+            chatId,
             "NSWF has been enabled! Type *!nsfw* to see nsfw memes",
             id
           );
         } else {
-          nsfw_.splice(chat.id, 1);
+          nsfw_.splice(chatId, 1);
           fs.writeFileSync("./lib/NSFW.json", JSON.stringify(nsfw_));
-          client.reply(from, "NSFW has been disabled in this group", id);
+          client.reply(chatId, "NSFW has been disabled in this group", id);
         }
         break;
       case "!help":
