@@ -215,14 +215,86 @@ module.exports = msgHandler = async (client, message) => {
         if (args.length === 1)
           return client.reply(
             chatId,
-            "Syntax *!tts [en, hi, jp,..] [text]*, contoh *!tts en Hello*\nwhere en=english, hi=hindi, jp=japanese, etc."
+            "Syntax *!tts [en, hi, ja,..] [text]*, contoh *!tts en Hello*\nwhere en=english, hi=hindi, ja=japanese, etc.\n Send *!tts listlang* to list all supported languages."
           );
+        const LANGUAGES = {
+          af: "Afrikaans",
+          sq: "Albanian",
+          ar: "Arabic",
+          hy: "Armenian",
+          ca: "Catalan",
+          zh: "Chinese",
+          "zh-cn": "Chinese (Mandarin/China)",
+          "zh-tw": "Chinese (Mandarin/Taiwan)",
+          "zh-yue": "Chinese (Cantonese)",
+          hr: "Croatian",
+          cs: "Czech",
+          da: "Danish",
+          nl: "Dutch",
+          en: "English",
+          "en-au": "English (Australia)",
+          "en-uk": "English (United Kingdom)",
+          "en-us": "English (United States)",
+          eo: "Esperanto",
+          fi: "Finnish",
+          fr: "French",
+          de: "German",
+          el: "Greek",
+          ht: "Haitian Creole",
+          hi: "Hindi",
+          hu: "Hungarian",
+          is: "Icelandic",
+          id: "Indonesian",
+          it: "Italian",
+          ja: "Japanese",
+          ko: "Korean",
+          la: "Latin",
+          lv: "Latvian",
+          mk: "Macedonian",
+          no: "Norwegian",
+          pl: "Polish",
+          pt: "Portuguese",
+          "pt-br": "Portuguese (Brazil)",
+          ro: "Romanian",
+          ru: "Russian",
+          sr: "Serbian",
+          sk: "Slovak",
+          es: "Spanish",
+          "es-es": "Spanish (Spain)",
+          "es-us": "Spanish (United States)",
+          sw: "Swahili",
+          sv: "Swedish",
+          ta: "Tamil",
+          th: "Thai",
+          tr: "Turkish",
+          vi: "Vietnamese",
+          cy: "Welsh",
+        };
         const tts = require("node-gtts");
-        const dataText = body.slice(8);
-        if (dataText === "") return client.reply(chatId, "Didn't get you", id);
-        if (dataText.length > 500)
-          return client.reply(chatId, "Text is too long!", id);
+        const dataText = body.slice(6 + args[1].length);
         var dataBhs = args[1].toLowerCase();
+        if (dataBhs === "listlang")
+          return client.reply(
+            chatId,
+            Object.keys(LANGUAGES).reduce(
+              (prev, curr) => prev + `\n${curr}: ${LANGUAGES[curr]}`,
+              "List of supported languages\n"
+            ),
+            id
+          );
+        if (!Object.keys(LANGUAGES).includes(dataBhs))
+          return client.reply(
+            chatId,
+            "Language not supported! Send *!tts listlang* to list all supported languages!",
+            id
+          );
+        if (dataText === "") return client.reply(chatId, "Didn't get you", id);
+        if (dataText.length > 1000)
+          return client.reply(
+            chatId,
+            "Text is too long! Limit is 1000 characters",
+            id
+          );
         try {
           tts2 = tts(dataBhs);
           tts2.save("./media/tts/res.mp3", dataText, function () {
@@ -989,7 +1061,7 @@ module.exports = msgHandler = async (client, message) => {
               id
             );
           } else if (args[1].toLowerCase() === "disable") {
-            enabledgrps.splice(chat.id, 1);
+            enabledgrps.splice(chatId, 1);
             fs.writeFileSync("./lib/groups.json", JSON.stringify(enabledgrps));
             client.reply(chatId, "Bot disabled in this group!", id);
           } else {
