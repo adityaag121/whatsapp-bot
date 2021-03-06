@@ -27,7 +27,8 @@ const {
   removeBackgroundFromImageFile,
 } = require("remove.bg");
 
-const config = require("./config");
+// const config = require("./config");
+const config = process.env;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
