@@ -6,7 +6,7 @@ module.exports = options = (headless, start) => {
         authTimeout: 0,
         restartOnCrash: start,
         cacheEnabled: false,
-        useChrome: true,
+        executablePath: './node_modules/puppeteer/.local-chromium/win64-884014/chrome-win/chrome.exe',
         killProcessOnBrowserClose: true,
         throwErrorOnTosBlock: false,
         chromiumArgs: [
