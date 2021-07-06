@@ -3,22 +3,16 @@ const fs = require("fs-extra");
 const axios = require("axios");
 const moment = require("moment-timezone");
 const get = require("got");
-const fetch = require("node-fetch");
 const color = require("./lib/color");
-const { spawn, exec } = require("child_process");
+const { exec } = require("child_process");
 const nhentai = require("nhentai-js");
 const { API } = require("nhentai-api");
 const {
   liriklagu,
   quotemaker,
-  randomNimek,
-  fb,
-  sleep,
   jadwalTv,
-  ss,
 } = require("./lib/functions");
-const { help, snk, info, donate, readme, listChannel } = require("./lib/help");
-const { stdout } = require("process");
+const { help, info } = require("./lib/help");
 const nsfw_ = JSON.parse(fs.readFileSync("./lib/NSFW.json"));
 const enabledgrps = JSON.parse(fs.readFileSync("./lib/groups.json"));
 const {
@@ -27,10 +21,9 @@ const {
   removeBackgroundFromImageFile,
 } = require("remove.bg");
 
-// const config = require("./config");
-const config = process.env;
+const config = process.env.config?process.env:require("./config");
 
-moment.tz.setDefault("Asia/Jakarta").locale("id");
+moment.tz.setDefault("Asia/Kolkata").locale("in");
 
 module.exports = msgHandler = async (client, message) => {
   try {
@@ -748,30 +741,6 @@ module.exports = msgHandler = async (client, message) => {
         const lirik = await liriklagu(lagu);
         client.reply(chatId, lirik, id);
         break;
-      case "!listchannel":
-        client.reply(chatId, listChannel, id);
-        break;
-      case "!jadwaltv":
-        if (args.length === 1)
-          return client.reply(
-            chatId,
-            "Kirim perintah *!jadwalTv [channel]*",
-            id
-          );
-        const query = body.slice(10).toLowerCase();
-        const jadwal = await jadwalTv(query);
-        client.reply(chatId, jadwal, id);
-        break;
-      case "!jadwaltvnow":
-        const jadwalNow = await get
-          .get("https://api.haipbis.xyz/jadwaltvnow")
-          .json();
-        client.reply(
-          chatId,
-          `Jam : ${jadwalNow.jam}\n\nJadwalTV : ${jadwalNow.jadwalTV}`,
-          id
-        );
-        break;
       case "!husbu":
         const diti = fs.readFileSync("./lib/husbu.json");
         const ditiJsin = JSON.parse(diti);
@@ -1025,18 +994,12 @@ module.exports = msgHandler = async (client, message) => {
       case "!help":
         client.sendText(chatId, help);
         break;
-      case "!readme":
-        client.reply(chatId, readme, id);
-        break;
       case "!info":
         client.sendLinkWithAutoPreview(
           chatId,
           "https://github.com/adityaag121/whatsapp-bot",
           info
         );
-        break;
-      case "!snk":
-        client.reply(chatId, snk, id);
         break;
       default:
         if (!isOwner && command.startsWith("!"))
