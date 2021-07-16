@@ -1060,7 +1060,6 @@ module.exports = msgHandler = async (client, message) => {
                 const igUrl = new URL(body.slice(4));
                 const igCode = igUrl.pathname.split("/")[2];
                 InstagramApi.default.get(igCode).then((result) => {
-                    console.log(result);
                     client.sendFileFromUrl(
                         chatId,
                         result.url,
