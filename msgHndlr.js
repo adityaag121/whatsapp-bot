@@ -18,6 +18,7 @@ const {
 } = require("remove.bg");
 const ytdl = require("ytdl-core");
 const InstagramApi = require("simple-instagram-api");
+const fbdl = require("fbdl-core");
 
 const config = process.env.config ? process.env : require("./config");
 
@@ -1018,18 +1019,6 @@ module.exports = msgHandler = async (client, message) => {
                     info
                 );
                 break;
-            case "!fb":
-                if (args.length == 1)
-                    return client.reply(chatId, "Send command *!fb [url]*", id);
-                const url1 = body.slice(4);
-                const res = await fb(url1);
-                client.sendFileFromUrl(
-                    chatId,
-                    res.url,
-                    "video" + res.exts,
-                    res.capt
-                );
-                break;
             case "!yt":
                 if (args.length == 1)
                     return client.reply(chatId, "Send command *!yt [url]*", id);
@@ -1072,15 +1061,44 @@ module.exports = msgHandler = async (client, message) => {
                     return client.reply(chatId, "Send command *!ig [url]*", id);
                 const igUrl = new URL(body.slice(4));
                 const igCode = igUrl.pathname.split("/")[2];
-                InstagramApi.default.get(igCode).then((result) => {
-                    client.sendFileFromUrl(
-                        chatId,
-                        result.url,
-                        null,
-                        result.caption,
-                        id
-                    );
-                });
+                await InstagramApi.default.get(igCode).then(
+                    async (result) => {
+                        await client.sendFileFromUrl(
+                            chatId,
+                            result.url,
+                            null,
+                            result.caption,
+                            id
+                        );
+                    },
+                    async (err) => {
+                        console.log(err);
+                        await client.reply(chatId, "Some Error occured!", id);
+                    }
+                );
+                break;
+            case "!fb":
+                if (args.length == 1)
+                    return client.reply(chatId, "Send command *!fb [url]*", id);
+                const fbUrl = body.slice(4);
+                await fbdl.getInfo(fbUrl).then(
+                    async (info) => {
+                        if (!info.streamURL)
+                            await client.reply(chatId, "video not found!", id);
+                        else
+                            await client.sendFileFromUrl(
+                                chatId,
+                                info.streamURL,
+                                "video.mp4",
+                                info.title,
+                                id
+                            );
+                    },
+                    async (err) => {
+                        console.log(err);
+                        await client.reply(chatId, "Some Error occured!", id);
+                    }
+                );
                 break;
             default:
                 if (!isOwner && command.startsWith("!"))
