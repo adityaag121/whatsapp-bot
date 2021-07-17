@@ -1034,25 +1034,38 @@ module.exports = msgHandler = async (client, message) => {
                 if (args.length == 1)
                     return client.reply(chatId, "Send command *!yt [url]*", id);
                 const yturl = body.slice(4);
-                if (!ytdl.validateURL(yturl))
-                    return client.reply(chatId, "Invalid youtube URL");
-                const ytId = ytdl.getVideoID(yturl);
-                const path = "./media/vid/" + ytId + ".mp4";
-                let caption = "";
-                const writeStream = fs.createWriteStream(path);
-                writeStream.on("open", () =>
-                    ytdl(yturl)
-                        .on(
-                            "info",
-                            (ytinfo) => (caption = ytinfo.videoDetails.title)
-                        )
-                        .pipe(writeStream)
+                // const ytId = ytdl.getVideoID(yturl);
+                // const path = "./media/vid/" + ytId + ".mp4";
+                // let caption = "";
+                // const writeStream = fs.createWriteStream(path);
+                // writeStream.on("open", () =>
+                //     ytdl(yturl)
+                //         .on(
+                //             "info",
+                //             (ytinfo) => (caption = ytinfo.videoDetails.title)
+                //         )
+                //         .pipe(writeStream)
+                // );
+                // writeStream.on("finish", () => {
+                //     client
+                //         .sendFile(chatId, path, ytId + ".mp4", caption, id)
+                //         .then(() => fs.unlink(path));
+                // });
+                await ytdl.getInfo(yturl).then(
+                    async (info) => {
+                        await client.sendFileFromUrl(
+                            chatId,
+                            ytdl.chooseFormat(info.formats, {}).url,
+                            "video.mp4",
+                            info.videoDetails.title,
+                            id
+                        );
+                    },
+                    async (err) => {
+                        console.log(err);
+                        await client.reply(chatId, "Some Error occured!", id);
+                    }
                 );
-                writeStream.on("finish", () => {
-                    client
-                        .sendFile(chatId, path, ytId + ".mp4", caption, id)
-                        .then(() => fs.unlink(path));
-                });
                 break;
             case "!ig":
                 if (args.length == 1)
