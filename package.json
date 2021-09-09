@@ -10,8 +10,8 @@
   "author": "Mhank BarBar",
   "license": "Apache-2.0",
   "dependencies": {
-    "@open-wa/wa-automate": "^4.11.1",
-    "@open-wa/wa-decrypt": "^4.0.1",
+    "@open-wa/wa-automate": "^4.20.6",
+    "@open-wa/wa-decrypt": "^4.3.1",
     "axios": "^0.21.1",
     "chalk": "^4.1.1",
     "emoji-regex": "^9.0.0",

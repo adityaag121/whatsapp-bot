@@ -138,12 +138,12 @@ module.exports = msgHandler = async (client, message) => {
             case "!sticker":
             case "!stiker":
             case "!st":
-                let metadata = { author: "", pack: "" };
+                let metadata = { author: "", pack: "", keepScale: true };
                 if (args.includes("wname") || args.includes("withname")) {
                     metadata.author = pushname;
                     metadata.pack = pushname;
                 }
-                if (args.includes("nocrop")) metadata.keepScale = true;
+                if (args.includes("crop")) metadata.keepScale = false;
                 if (
                     (isMedia && type === "image" && mimetype !== "image/gif") ||
                     (quotedMsg &&
@@ -187,11 +187,12 @@ module.exports = msgHandler = async (client, message) => {
                             chatId,
                             mediaData,
                             {
-                                crop: false,
+                                crop: !metadata.keepScale,
                                 endTime:
                                     msg.duration >= 10
                                         ? "00:00:10.0"
-                                        : `00:00:0${msg.duration}.0`,
+                                        : `00:00:0${msg.duration}.9`,
+                                fps: 24,
                             },
                             metadata
                         );
@@ -208,13 +209,22 @@ module.exports = msgHandler = async (client, message) => {
                     await client
                         .sendStickerfromUrl(chatId, args[1], { method: "get" })
                         .catch((err) => console.log("Caught exception: ", err));
+                } else if (quotedMsgObj.type == "sticker") {
+                    const mediaData = await decryptMedia(
+                        quotedMsgObj,
+                        uaOverride
+                    );
+                    let imageBase64 = `data:image/webp;base64,${mediaData.toString(
+                        "base64"
+                    )}`;
+                    return client.sendImage(chatId, imageBase64, null, null, id);
                 } else {
                     client.reply(chatId, mess.error.St, id);
                 }
                 break;
             case "!texttospeech":
             case "!tts":
-                if (args.length === 1)
+                if (args.length === 1 && !quotedMsg)
                     return client.reply(
                         chatId,
                         "Syntax *!tts [en, hi, ja,..] [text]*, contoh *!tts en Hello*\nwhere en=english, hi=hindi, ja=japanese, etc.\n Send *!tts listlang* to list all supported languages."
@@ -273,7 +283,8 @@ module.exports = msgHandler = async (client, message) => {
                     cy: "Welsh",
                 };
                 const tts = require("node-gtts");
-                const dataText = body.slice(6 + args[1].length);
+                let dataText = body.slice(6 + args[1].length);
+                if (!dataText && quotedMsg) dataText = quotedMsgObj.body;
                 var dataBhs = args[1].toLowerCase();
                 if (dataBhs === "listlang")
                     return client.reply(
@@ -1100,6 +1111,15 @@ module.exports = msgHandler = async (client, message) => {
                     }
                 );
                 break;
+            case "!fwd":
+            case "!forward":
+                if (!quotedMsg)
+                    return client.reply(
+                        chatId,
+                        "Reply to a message with this command to forward the quoted msg",
+                        id
+                    );
+                return client.forwardMessages(chatId, quotedMsg.id);
             default:
                 if (!isOwner && command.startsWith("!"))
                     client.reply(
